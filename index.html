@@ -88,8 +88,8 @@ blockquote.dante small{display:block;margin-top:6px;font-style:normal;font-famil
 .cvbox h3{margin:0 0 9px;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);border-bottom:2px solid var(--acc);padding-bottom:4px}
 .cvbox.blue h3{color:var(--blue);border-color:var(--blue)}
 /* desktop side decorations */
-.side{position:fixed;top:50%;transform:translateY(-50%);z-index:2;display:none;flex-direction:column;align-items:center;gap:26px;pointer-events:none}
-.side.on{display:flex}
+.deco{position:fixed;top:50%;transform:translateY(-50%);z-index:2;display:none;flex-direction:column;align-items:center;gap:26px;pointer-events:none}
+.deco.on{display:flex}
 .quote{background:rgba(255,255,255,.78);backdrop-filter:blur(4px);border-radius:16px;padding:20px 22px;max-width:100%;
   box-shadow:0 6px 22px rgba(30,60,90,.18);border-top:4px solid var(--acc)}
 .quote q{display:block;font-family:Georgia,"Times New Roman",serif;font-size:21px;line-height:1.45;font-style:italic;color:var(--dark);quotes:none}
@@ -132,7 +132,7 @@ noscript{position:fixed;inset:auto 0 0 0;background:#fff;padding:14px;z-index:20
   </nav>
 </header>
 
-<aside class="side" id="sideL" aria-hidden="true">
+<aside class="deco" id="sideL" aria-hidden="true">
   <div class="quote"><q>If I had six hours to chop down a tree I'd spend the first four hours sharpening the axe.</q><cite>Abraham Lincoln</cite></div>
   <svg class="dial" id="compass" viewBox="-100 -100 200 200">
     <circle r="94" fill="#f7f2e4" stroke="#2f4150" stroke-width="5"/>
@@ -142,7 +142,7 @@ noscript{position:fixed;inset:auto 0 0 0;background:#fff;padding:14px;z-index:20
     <g id="needle"><polygon points="0,-58 9,0 -9,0" fill="#e2703a"/><polygon points="0,58 9,0 -9,0" fill="#2f4150"/><circle r="5" fill="#fff" stroke="#2f4150" stroke-width="2"/></g>
   </svg>
 </aside>
-<aside class="side" id="sideR" aria-hidden="true">
+<aside class="deco" id="sideR" aria-hidden="true">
   <div class="quote"><q>I choose a lazy person to do a hard job. Because a lazy person will find an easy way to do it.</q><cite>Bill Gates</cite></div>
   <svg class="dial" id="wheel" viewBox="-100 -100 200 200">
     <g id="wheelSpin" stroke="#7a4e2a" stroke-linecap="round">
