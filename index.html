@@ -1,285 +1,863 @@
-
-<!DOCTYPE html>
-<html lang="it">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gabriele Cafiero - CV Voyage</title>
+<meta name="description" content="Gabriele Cafiero, Quality Assurance. Sail through my career, island by island, avoiding rocks and storm waves.">
+<meta property="og:title" content="Gabriele Cafiero - CV Voyage">
+<meta property="og:description" content="Sail through my career, island by island. Quality Assurance, Test Automation & AI.">
+<meta property="og:image" content="avatar.png">
+<meta name="theme-color" content="#9ec9e8">
+<link rel="icon" href="avatar.png">
+<style>
+:root{
+  --dark:#2f4150; --acc:#e2703a; --acc-bg:#fdeee5; --blue:#2b6cb0; --blue-bg:#e6f0fa;
+  --panel:#d0e2f0; --txt:#33414d; --paper:#ffffff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#a9d0ea;color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+canvas#game{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
 
-    <title>CV — Prossimamente disponibile</title>
-    <meta name="description"
-          content="Il mio curriculum online è in preparazione. Presto saranno disponibili il mio percorso, le competenze e i progetti.">
+/* top bar */
+#bar{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;
+  padding:calc(env(safe-area-inset-top) + 8px) calc(env(safe-area-inset-right) + 10px) 8px calc(env(safe-area-inset-left) + 10px);
+  pointer-events:none}
+#bar > *{pointer-events:auto}
+.brand{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.88);backdrop-filter:blur(6px);
+  border-radius:999px;padding:4px 14px 4px 4px;box-shadow:0 2px 8px rgba(30,60,90,.18)}
+.brand img{width:34px;height:34px;border-radius:50%;display:block}
+.brand strong{display:block;font-size:14px;line-height:1.1;color:var(--dark)}
+.brand small{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);font-weight:700}
+.hud{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.88);backdrop-filter:blur(6px);
+  border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;color:var(--dark);box-shadow:0 2px 8px rgba(30,60,90,.18)}
+#hearts{letter-spacing:2px;color:#d6433b;white-space:nowrap}
+#hearts .off{color:#b9c4cc}
+#prog{white-space:nowrap}
+.actions{margin-left:auto;display:flex;gap:8px}
+.btn{appearance:none;border:0;cursor:pointer;font:inherit;font-weight:700;font-size:14px;text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;
+  background:var(--acc);color:#fff;box-shadow:0 2px 8px rgba(30,60,90,.25);white-space:nowrap}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:rgba(255,255,255,.92);color:var(--dark)}
+.btn.blue{background:var(--blue)}
+.btn:focus-visible,.card a:focus-visible{outline:3px solid var(--dark);outline-offset:2px}
 
-    <style>
-        :root {
-            --background: #f8f9fb;
-            --text: #172033;
-            --muted: #6b7280;
-            --accent: #2563eb;
-            --border: #e5e7eb;
-        }
+@media (max-width:560px){
+  .brand strong{font-size:13px}
+  .btn{padding:8px 11px;font-size:13px}
+  .btn .long{display:none}
+}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+/* toast */
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 22px);transform:translate(-50%,20px);z-index:6;
+  background:var(--dark);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;max-width:88vw;text-align:center;
+  opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+#toast.show{opacity:1;transform:translate(-50%,0)}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                         Roboto, Helvetica, Arial, sans-serif;
-            background: var(--background);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+/* overlay card */
+#overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:16px;
+  background:rgba(20,40,60,.45);backdrop-filter:blur(3px)}
+#overlay[hidden],#readpanel[hidden]{display:none}
+.card{background:var(--paper);border-radius:18px;max-width:560px;width:100%;max-height:calc(100dvh - 32px);overflow:auto;
+  box-shadow:0 18px 50px rgba(10,30,50,.4);animation:pop .25s ease-out}
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+.card .head{padding:20px 22px 14px;background:var(--panel);border-bottom:4px solid var(--acc);position:relative}
+.card.side .head{background:var(--acc-bg)}
+.card .emoji{font-size:38px;line-height:1}
+.card .kicker{font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:var(--acc);margin:8px 0 2px}
+.card h2{margin:0;font-size:25px;color:var(--dark);line-height:1.15}
+.card .role{margin:4px 0 0;font-weight:700;color:var(--blue)}
+.card .body{padding:16px 22px 6px;font-size:15.5px;line-height:1.55}
+.card .body p{margin:0 0 12px}
+.card .foot{padding:8px 22px 20px;display:flex;flex-wrap:wrap;gap:10px}
+.card .intro-avatar{width:92px;height:92px;border-radius:50%;float:right;margin:0 0 6px 12px;box-shadow:0 3px 10px rgba(0,0,0,.2)}
+.card .meta{font-size:13.5px;color:var(--dark);margin:8px 0 0;font-weight:600}
+.card .links a{color:var(--blue);font-weight:700}
+.card .keys{font-size:13.5px;background:var(--blue-bg);border-left:4px solid var(--blue);padding:9px 12px;border-radius:6px;margin:12px 0}
 
-        header {
-            padding: 28px 8%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .logo {
-            font-size: 1.2rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        .logo span {
-            color: var(--accent);
-        }
-
-        .badge {
-            font-size: 0.8rem;
-            color: var(--accent);
-            background: #eff6ff;
-            border: 1px solid #dbeafe;
-            padding: 8px 14px;
-            border-radius: 30px;
-        }
-
-        main {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 70px 24px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 760px;
-            animation: fadeIn 0.9s ease-out;
-        }
-
-        .label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--accent);
-            font-size: 0.78rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 26px;
-        }
-
-        .label::before {
-            content: "";
-            width: 30px;
-            height: 2px;
-            background: var(--accent);
-        }
-
-        h1 {
-            font-size: clamp(2.8rem, 7vw, 5.5rem);
-            line-height: 1.04;
-            letter-spacing: -3px;
-            margin-bottom: 28px;
-        }
-
-        h1 span {
-            color: var(--accent);
-        }
-
-        .description {
-            max-width: 580px;
-            color: var(--muted);
-            font-size: 1.1rem;
-            line-height: 1.8;
-            margin-bottom: 40px;
-        }
-
-        .details {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 40px;
-        }
-
-        .detail {
-            border: 1px solid var(--border);
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-        }
-
-        .detail .number {
-            display: block;
-            color: var(--accent);
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-        }
-
-        .detail h2 {
-            font-size: 0.95rem;
-            margin-bottom: 6px;
-        }
-
-        .detail p {
-            color: var(--muted);
-            font-size: 0.8rem;
-            line-height: 1.5;
-        }
-
-        .contact {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            color: white;
-            background: var(--text);
-            text-decoration: none;
-            padding: 15px 22px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: background 0.2s, transform 0.2s;
-        }
-
-        .contact:hover {
-            background: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        footer {
-            border-top: 1px solid var(--border);
-            padding: 24px;
-            text-align: center;
-            color: var(--muted);
-            font-size: 0.8rem;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(16px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 600px) {
-            header {
-                padding: 22px 6%;
-            }
-
-            .badge {
-                font-size: 0.7rem;
-                padding: 7px 10px;
-            }
-
-            h1 {
-                letter-spacing: -1.5px;
-            }
-
-            .description {
-                font-size: 1rem;
-            }
-
-            .details {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .detail {
-                padding: 16px;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation: none !important;
-                transition: none !important;
-            }
-        }
-    </style>
+blockquote.dante{margin:6px 0 14px;padding:10px 14px;border-left:4px solid var(--acc);background:var(--acc-bg);
+  border-radius:0 10px 10px 0;font-family:Georgia,"Times New Roman",serif;font-size:17px;line-height:1.5;font-style:italic;color:var(--dark)}
+blockquote.dante.en{border-color:var(--blue);background:var(--blue-bg);font-size:15.5px}
+blockquote.dante small{display:block;margin-top:6px;font-style:normal;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:700;color:var(--blue)}
+.cvbox{border-radius:10px;padding:12px 16px 4px;margin:2px 0 12px;border-left:4px solid var(--acc);background:var(--acc-bg)}
+.cvbox.blue{border-color:var(--blue);background:var(--blue-bg)}
+.cvbox h3{margin:0 0 9px;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);border-bottom:2px solid var(--acc);padding-bottom:4px}
+.cvbox.blue h3{color:var(--blue);border-color:var(--blue)}
+/* desktop side decorations */
+.side{position:fixed;top:50%;transform:translateY(-50%);z-index:2;display:none;flex-direction:column;align-items:center;gap:26px;pointer-events:none}
+.side.on{display:flex}
+.quote{background:rgba(255,255,255,.78);backdrop-filter:blur(4px);border-radius:16px;padding:20px 22px;max-width:100%;
+  box-shadow:0 6px 22px rgba(30,60,90,.18);border-top:4px solid var(--acc)}
+.quote q{display:block;font-family:Georgia,"Times New Roman",serif;font-size:21px;line-height:1.45;font-style:italic;color:var(--dark);quotes:none}
+.quote q::before{content:"\201C";display:block;font-size:54px;line-height:.6;color:var(--acc);margin-bottom:6px}
+.quote cite{display:block;margin-top:12px;font-style:normal;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:12px;color:var(--blue)}
+.dial{width:min(210px,100%);height:auto;filter:drop-shadow(0 6px 10px rgba(30,60,90,.25))}
+/* read panel */
+#readpanel{position:fixed;inset:0;z-index:11;background:rgba(20,40,60,.55);backdrop-filter:blur(3px);overflow:auto;padding:16px}
+#readpanel .sheet{background:#fff;max-width:760px;margin:0 auto;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(10,30,50,.4)}
+#readpanel .sheet-head{display:flex;gap:16px;align-items:center;padding:20px 22px;background:var(--panel);border-bottom:4px solid var(--acc)}
+#readpanel .sheet-head img{width:84px;height:84px;border-radius:50%}
+#readpanel h1{margin:0;font-size:28px;color:var(--dark)}
+#readpanel .sub{color:var(--acc);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:13px}
+#readpanel .contact{font-size:14px;margin-top:6px;line-height:1.5}
+#readpanel .contact a,#readpanel .links a{color:var(--blue);font-weight:700}
+#readpanel .sec{padding:6px 22px 4px}
+#readpanel h3{color:var(--acc);text-transform:uppercase;letter-spacing:.06em;font-size:15px;border-bottom:2px solid var(--acc);padding-bottom:4px;margin:18px 0 10px}
+#readpanel h4{margin:14px 0 2px;color:var(--blue);font-size:16px}
+#readpanel p{font-size:15px;line-height:1.55;margin:0 0 10px}
+#readpanel blockquote{margin:0 0 10px;padding-left:12px;border-left:3px solid var(--acc);font-style:italic}
+#readpanel .box{border-radius:10px;padding:10px 14px;margin:10px 0}
+#readpanel .box.blue{background:var(--blue-bg);border-left:4px solid var(--blue)}
+#readpanel .box.acc{background:var(--acc-bg);border-left:4px solid var(--acc)}
+#readpanel .sheet-foot{display:flex;gap:10px;flex-wrap:wrap;padding:14px 22px 22px}
+noscript{position:fixed;inset:auto 0 0 0;background:#fff;padding:14px;z-index:20;text-align:center}
+</style>
 </head>
-
 <body>
+<canvas id="game" aria-label="Sailing game: steer the boat to the islands to discover Gabriele Cafiero's career. Use 'Read CV' for the plain text version."></canvas>
 
-    <header>
-        <div class="logo">CURRICULUM<span>.</span></div>
-        <div class="badge">In preparazione</div>
-    </header>
+<header id="bar">
+  <div class="brand">
+    <img src="avatar.png" alt="Gabriele Cafiero">
+    <div><strong>Gabriele Cafiero</strong><small>Quality Assurance</small></div>
+  </div>
+  <div class="hud" aria-live="polite"><span id="hearts" aria-label="Hull"></span><span id="prog"></span></div>
+  <nav class="actions">
+    <button class="btn ghost" id="btnRead" type="button">📄 <span>Read<span class="long"> CV</span></span></button>
+    <a class="btn" id="btnDl" href="CV_Gabriele_Cafiero_EN.pdf" download="CV_Gabriele_Cafiero_EN.pdf">⬇ <span>PDF<span class="long"> CV</span></span></a>
+  </nav>
+</header>
 
-    <main>
-        <section class="container">
+<aside class="side" id="sideL" aria-hidden="true">
+  <div class="quote"><q>If I had six hours to chop down a tree I'd spend the first four hours sharpening the axe.</q><cite>Abraham Lincoln</cite></div>
+  <svg class="dial" id="compass" viewBox="-100 -100 200 200">
+    <circle r="94" fill="#f7f2e4" stroke="#2f4150" stroke-width="5"/>
+    <circle r="80" fill="none" stroke="#2f4150" stroke-width="1.2" stroke-dasharray="2 5"/>
+    <g font-family="Georgia,serif" font-weight="700" font-size="17" text-anchor="middle" fill="#2f4150">
+      <text y="-62">N</text><text x="64" y="6">E</text><text y="74">S</text><text x="-64" y="6">W</text></g>
+    <g id="needle"><polygon points="0,-58 9,0 -9,0" fill="#e2703a"/><polygon points="0,58 9,0 -9,0" fill="#2f4150"/><circle r="5" fill="#fff" stroke="#2f4150" stroke-width="2"/></g>
+  </svg>
+</aside>
+<aside class="side" id="sideR" aria-hidden="true">
+  <div class="quote"><q>I choose a lazy person to do a hard job. Because a lazy person will find an easy way to do it.</q><cite>Bill Gates</cite></div>
+  <svg class="dial" id="wheel" viewBox="-100 -100 200 200">
+    <g id="wheelSpin" stroke="#7a4e2a" stroke-linecap="round">
+      <circle r="62" fill="none" stroke-width="14"/>
+      <circle r="62" fill="none" stroke="#a9733f" stroke-width="5"/>
+      <g stroke-width="9"><line x1="-92" y1="0" x2="92" y2="0"/><line x1="0" y1="-92" x2="0" y2="92"/>
+      <line x1="-65" y1="-65" x2="65" y2="65"/><line x1="-65" y1="65" x2="65" y2="-65"/></g>
+      <circle r="17" fill="#e2703a" stroke="#7a4e2a" stroke-width="4"/>
+    </g>
+  </svg>
+</aside>
+<div id="toast" role="status"></div>
+<div id="overlay" hidden><div class="card" id="card" role="dialog" aria-modal="true"></div></div>
+<div id="readpanel" hidden></div>
+<noscript>This page is an interactive CV game that needs JavaScript. <a href="CV_Gabriele_Cafiero_EN.pdf">Download the CV as PDF</a>.</noscript>
 
-            <p class="label">Personal website</p>
+<script>
+(() => {
+'use strict';
 
-            <h1>Il mio percorso.<br>
-                <span>La mia storia.</span>
-            </h1>
+/* ============================================================
+   CONTENT
+   ============================================================ */
+const LINKS = {
+  cv:   'https://falax-io.github.io/cv/',
+  blog: 'https://falax.netlify.app',
+  pdf:  'CV_Gabriele_Cafiero_EN.pdf',
+  mail: 'g.cafiero91@gmail.com',
+  tel:  '+39 324 772 55 97'
+};
 
-            <p class="description">
-                Sto preparando il mio curriculum online.
-                Presto troverai qui il mio percorso formativo,
-                le mie competenze, le esperienze professionali
-                e i progetti a cui ho lavorato.
-            </p>
+const ABOUT = [
+  `My laziness brought me to the world of automation and my strongest skills are about automation testing. I always try to improve testing by keeping in mind the goal of the project, and primarily the quality of the deliverables. When I worked directly with customers I made sure to give them an accurate feedback by reporting them an overall and understandable summary of the progress of the testing. My focus was on reporting bugs to the dev team, trying to give them as much information as I could and - if possible - a way to find the root cause together in order to avoid new bugs. I do believe quality starts from process and it should be moved as much to the "left" as possible.`,
+  `<blockquote>"If I had six hours to chop down a tree I'd spend the first four hours sharpening the axe." <br>- Abraham Lincoln</blockquote>`,
+  `Apart from learning to light a fire without a match, when I was a boy scout I learnt to work in a team. This experience showed me how important it is to train juniors, in order to create a strong team that believes in leaders and not in bosses. I do believe that the best way to solve problems is scientific thinking - even when a boar is running towards you. Quick thinking is just as important as experience, both are tools that must be continuously practiced and called into question. I always try to think outside the box, and I believe that anybody who is part of a team, regardless of their seniority or role, can, on the basis of their experience, contribute to finding solutions. I've worked directly with customers, an experience that taught me how to deal with difficult situations, bearing in mind both technical and business values, and how important it is to interact with human beings while always staying professional. I strongly believe in "agile" frameworks, which led me to try to timebox my girlfriend's shopping, and their usages with a look at the practice and not only at the theory. A lot of times low confidence in agile methodology stems from teams being trained only by-the-book, without any advice about facing real-life challenges.`,
+  `<blockquote>"I choose a lazy person to do a hard job. Because a lazy person will find an easy way to do it." <br>- Bill Gates</blockquote>`
+];
 
-            <div class="details">
+/* Stops: main route (kind main), optional side routes (kind side), final lighthouse (kind end).
+   World: x in [0,400], boat starts at y=0, journey goes up (negative y). */
+const STOPS = [
+  { key:'rgi', kind:'main', x:205, y:-560, r:52, emoji:'🏢', name:'RGI', range:'October 2016 - April 2020', year:'2016',
+    role:'Manual tester → Test automation',
+    c1:'#6fbf73', c2:'#4a9a58',
+    html:`<p>I started at RGI as a <b>manual tester</b>, but very soon switched to <b>automation</b> with the tool we used at the time (UFT). Shortly after I was in charge of creating a new testing project for the company product using <b>Selenium with Java</b>. It was very important to create <b>shared standards</b> as the project had a lot of contributors.</p>
+          <p>During the last two years I spent more time with <b>clients</b> than programming (while collaborating daily with the testing team). I understood the importance of a <b>strong but flexible and adaptive process</b>, as customers change ideas frequently and you need to be prepared for that.</p>` },
+  { key:'deltatre', kind:'main', x:115, y:-1170, r:52, emoji:'📺', name:'Deltatre', range:'April 2020 - September 2021', year:'2020',
+    role:'QA Engineer in a Scrum Team',
+    c1:'#7cc27a', c2:'#4f9c5c',
+    html:`<p>In Deltatre I worked as <b>QA Engineer</b> in a Scrum Team. My personal goal was <b>spreading a QA approach from the beginning</b>: challenging the PO about the acceptance criteria and the Devs about pushing code coverage higher and higher, helping them when needed, even <b>writing unit tests in pair</b>.</p>
+          <p>My favorite moment was when devs started using the testing tool I wrote and one of them said <b>"Testing is funny, now"</b>.</p>` },
+  { key:'cleafy', kind:'main', x:285, y:-1780, r:52, emoji:'🛡️', name:'Cleafy', range:'September 2021 - April 2022', year:'2021',
+    role:'QA Engineer, de facto Scrum Master',
+    c1:'#6fbf9a', c2:'#46967a',
+    html:`<p>In Cleafy I worked as <b>QA Engineer</b>. As the team was evolving I tried to spread <b>Agile culture</b> (using the Scrum framework) and became the <b>de facto Scrum Master</b>.</p>
+          <p>I think <b>quality starts from the process</b> and I see the Scrum Master role as a natural evolution of the QA role. Without a good process and a team working cohesively with a clear idea of their goals, quality is harder to reach.</p>` },
+  { key:'intesa', kind:'main', x:135, y:-2390, r:52, emoji:'🏦', name:'Intesa Sanpaolo', range:'April 2022 - February 2024', year:'2022',
+    role:'Test and Release Manager, Tech Lead QA',
+    c1:'#86c46c', c2:'#5a9d4c',
+    html:`<p>In Intesa Sanpaolo I worked as <b>Test and Release Manager</b> in the Accounting Team. I helped introduce new <b>quality processes</b> and build quality standards inside the team itself.</p>
+          <p>I was selected to be the <b>Tech Lead</b> for the Quality Assurance team of my area, leading <b>about ten colleagues</b> and creating a <b>Community of Practice</b>. I improved my "Scrum Master" skills by often facilitating the meetings of an internal side project.</p>` },
+  { key:'standup', kind:'side', x:335, y:-2740, r:44, emoji:'🎤', name:'Stand-up comedy', range:'Side route · 2023', year:'2023',
+    role:'Hobbies & passions', box:'acc', boxTitle:'Hobbies & passions',
+    c1:'#f1a56b', c2:'#d9803f',
+    html:`<p><b>Stand-up comedy.</b> I perform on stage, so I'm used to talking to people and relating to anyone, reacting to the unexpected and still bringing the result home. On stage, the result is laughter.</p>` },
+  { key:'generali', kind:'main', x:215, y:-3330, r:56, emoji:'🦁', name:'Generali Italia', range:'March 2024 - today', year:'2024',
+    role:'Test Automation & AI Architect',
+    c1:'#d96a45', c2:'#b94e30',
+    html:`<p>At Generali I work as <b>Test Automation &amp; AI Architect</b>, setting the guidelines for a <b>centralized framework</b> that everyone can easily use and update. I <b>leveraged AI to automate</b> processes that were expensive in terms of human and economic cost.</p>
+          <p>I have presented the project and the product I worked on a significant number of times, even in front of <b>hundreds of colleagues</b>. I support colleagues with their technical difficulties, always trying to automate the process so that I don't become a bottleneck, but rather an <b>enabler and facilitator</b> of their daily work.</p>` },
+  { key:'sailing', kind:'side', x:70, y:-3860, r:44, emoji:'⛵', name:'Sailing', range:'Side route · 2026', year:'2026',
+    role:'Hobbies & passions', box:'acc', boxTitle:'Hobbies & passions',
+    c1:'#f1a56b', c2:'#d9803f',
+    html:`<p><b>Sailing.</b> Sailing teaches how important it is to be able to fend for yourself when facing unexpected difficulties (which should stay unexpected only the first time: then you learn the lesson) and how important a reliable, indispensable crew is, when you have one, to hold the course and reach the destination.</p>` },
+  { key:'ambition', kind:'main', x:200, y:-4440, r:50, emoji:'🗼', name:'Ambition', range:'The horizon', year:'next',
+    role:'Where I want to go next', box:'blue', boxTitle:'Ambition',
+    c1:'#8f9de0', c2:'#6a79c4',
+    html:`<p>I would like to become a reference figure for juniors and colleagues, and to manage a project and a team. I feel I can put my experience at the service of good quality work and, as a consequence, of a reliable product.</p>` },
+  { key:'hercules', kind:'end', gate:true, x:200, y:-4830, r:34, emoji:'', name:"Pillars of Hercules", range:"Ne plus ultra", year:'',
+    role:'Where the known map ends',
+    c1:'#d8d2c4', c2:'#b8b09c',
+    html:`<blockquote class="dante">"Considerate la vostra semenza:<br>fatti non foste a viver come bruti,<br>ma per seguir virtute e canoscenza."</blockquote>
+          <blockquote class="dante en">"Consider your origin:<br>you were not made to live as brutes,<br>but to follow virtue and knowledge."<br><small>Dante Alighieri, Inferno XXVI</small></blockquote>` }
+];
+const START = { x:200, y:60 };
 
-                <article class="detail">
-                    <span class="number">01</span>
-                    <h2>Formazione</h2>
-                    <p>Studi, certificazioni e qualifiche.</p>
-                </article>
+/* ============================================================
+   DOM helpers
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const cvs = $('game'), ctx = cvs.getContext('2d');
+const overlay = $('overlay'), card = $('card'), readpanel = $('readpanel');
+const heartsEl = $('hearts'), progEl = $('prog'), toastEl = $('toast');
 
-                <article class="detail">
-                    <span class="number">02</span>
-                    <h2>Competenze</h2>
-                    <p>Conoscenze tecniche e professionali.</p>
-                </article>
+/* ============================================================
+   WORLD
+   ============================================================ */
+const WW = 400, BOTTOM = 120;
+const GATE = STOPS.find(s => s.gate);
+const TOP = GATE.y - 30;           // the boat cannot sail past the unexplored edge
+const EDGE = GATE.y - 64;          // where the drawn map ends
+function mulberry(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);
+  t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R = mulberry(260613);
 
-                <article class="detail">
-                    <span class="number">03</span>
-                    <h2>Progetti</h2>
-                    <p>Esperienze, lavori e risultati.</p>
-                </article>
+const hazards = [];
+(function gen(){
+  for (let y = -170; y > -4420; y -= 112) {
+    const n = R() < 0.35 ? 1 : 2, placed = [];
+    let waveUsed = false;
+    for (let i = 0; i < n; i++) {
+      let x, tries = 0;
+      do { x = 40 + R()*320; tries++; } while (tries < 25 && placed.some(p => Math.abs(p-x) < 150));
+      placed.push(x);
+      const yy = y + (R()*40 - 20);
+      const roll = R();
+      const shark = !waveUsed && roll < .30;
+      const wave = !waveUsed && !shark && roll < .62;
+      const hx = (wave || shark) ? Math.max(100, Math.min(300, x)) : x;
+      if (STOPS.some(s => Math.hypot(s.x-hx, s.y-yy) < s.r + 85 + (wave||shark?55:0))) continue;
+      if (shark) { waveUsed = true; hazards.push({ t:'s', x0:hx, x:hx, y:yy, amp:60+R()*30, sp:.7+R()*.5, ph:R()*6.28, dir:1 }); }
+      else if (wave) { waveUsed = true; hazards.push({ t:'w', x0:hx, x:hx, y:yy, amp:50+R()*28, sp:.55+R()*.55, ph:R()*6.28 }); }
+      else hazards.push({ t:'r', x, y:yy, r:13+R()*9, seed:R()*100 });
+    }
+  }
+})();
 
-            </div>
+/* ============================================================
+   STATE
+   ============================================================ */
+const boat = { x:START.x, y:START.y, vx:0, vy:0, a:0, hearts:3, inv:0 };
+const target = { x:START.x, y:START.y, active:false };
+const keys = {};
+const state = { paused:true, started:false, camY:START.y-500, last:{x:START.x,y:START.y}, shake:0, t:0 };
+const particles = [];
+const visited = new Set();
+let dpr=1, S=1, offX=0, viewH=600, cw=0, ch=0;
 
-            <a class="contact" href="mailto:info@example.com">
-                Contattami <span aria-hidden="true">↗</span>
-            </a>
+function resize(){
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cw = window.innerWidth; ch = window.innerHeight;
+  cvs.width = Math.round(cw*dpr); cvs.height = Math.round(ch*dpr);
+  S = Math.min(cw/WW, ch/560);
+  offX = (cw - WW*S)/2;
+  viewH = ch/S;
+  layoutSides();
+}
+function layoutSides(){
+  const L = $('sideL'), Rr = $('sideR'); if (!L || !Rr) return;
+  const room = offX - 36;                 // free space left of the sailing strip
+  const show = room >= 190 && cw >= 1000;
+  for (const [el, left] of [[L, true], [Rr, false]]) {
+    el.classList.toggle('on', show);
+    if (!show) continue;
+    el.style.width = Math.min(room, 330) + 'px';
+    const inner = Math.min(room, 330);
+    el.style.left = left ? ((offX - 18 - inner) + 'px') : ((offX + WW*S + 18) + 'px');
+  }
+}
+window.addEventListener('resize', resize);
+resize();
 
-        </section>
-    </main>
+/* ============================================================
+   UI: HUD, toast, cards
+   ============================================================ */
+function updateHud(){
+  heartsEl.innerHTML = [0,1,2].map(i => `<span class="${i<boat.hearts?'':'off'}">♥</span>`).join('');
+  const main = STOPS.filter(s => s.kind === 'main').length;
+  const side = STOPS.filter(s => s.kind === 'side').length;
+  const vm = STOPS.filter(s => s.kind === 'main' && visited.has(s.key)).length;
+  const vs = STOPS.filter(s => s.kind === 'side' && visited.has(s.key)).length;
+  progEl.textContent = `⚓ ${vm}/${main} · ★ ${vs}/${side}`;
+  progEl.title = 'Career islands visited · side routes visited';
+}
+let toastTimer;
+function toast(msg, ms=2600){
+  toastEl.textContent = msg; toastEl.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>toastEl.classList.remove('show'), ms);
+}
+function openCard(html, cls=''){
+  card.className = 'card ' + cls; card.innerHTML = html;
+  overlay.hidden = false; state.paused = true;
+  const b = card.querySelector('[data-close]'); if (b) b.focus();
+  card.scrollTop = 0;
+}
+function closeCard(){
+  overlay.hidden = true;
+  if (readpanel.hidden) { state.paused = false; boat.inv = Math.max(boat.inv, 2); }
+}
+overlay.addEventListener('click', e => { if (e.target === overlay && state.started) closeCard(); });
+card.addEventListener('click', e => { if (e.target.closest('[data-close]')) closeCard(); });
 
-    <footer>
-        &copy; <span id="year"></span> — Curriculum personale
-    </footer>
+const dlBtn = `<a class="btn" href="${LINKS.pdf}" download="CV_Gabriele_Cafiero_EN.pdf">⬇ Download CV (PDF)</a>`;
+function introCard(){
+  openCard(`
+    <div class="head">
+      <img class="intro-avatar" src="avatar.png" alt="Gabriele Cafiero">
+      <div class="kicker">Interactive CV</div>
+      <h2>Gabriele Cafiero</h2>
+      <p class="role">Quality Assurance</p>
+      <p class="meta">Torino (TO) · born 1991 · open to full remote</p>
+    </div>
+    <div class="body">
+      <p>My career is an archipelago. Sail from island to island to discover what I did in each one, dodging <b>rocks</b> and <b>storm waves</b> on the way. Two side routes, <b>2023</b> and <b>2026</b>, lead to the islands of my passions.</p>
+      <div class="keys"><b>Tap or click</b> where you want to go (hold and drag to steer). On a keyboard use <b>arrows / WASD</b>. Each island refills your hull.</div>
+    </div>
+    <div class="foot">
+      <button class="btn" data-close type="button">⛵ Set sail</button>
+      <button class="btn ghost" id="introRead" type="button">📄 Just read the CV</button>
+    </div>`);
+  $('introRead').addEventListener('click', () => { state.started = true; overlay.hidden = true; openRead(); });
+  card.querySelector('[data-close]').addEventListener('click', () => { state.started = true; }, { once:true });
+}
 
-    <script>
-        document.getElementById("year").textContent =
-            new Date().getFullYear();
-    </script>
+function stopCard(s){
+  const isEnd = s.kind === 'end';
+  const missed = STOPS.filter(x => x.kind === 'side' && !visited.has(x.key));
+  let extra = '';
+  if (isEnd) {
+    extra = `<p><b>You crossed the Pillars of Hercules.</b> Thanks for sailing through my CV.</p>
+      ${missed.length ? `<p>You skipped ${missed.length === 1 ? 'one side route' : missed.length + ' side routes'} (${missed.map(m=>m.year+' · '+m.name).join(', ')}). The sea is still open if you want to go back.</p>` : `<p>You even found every side route. Nice navigation.</p>`}
+      <p class="links">CV: <a href="${LINKS.cv}">falax-io.github.io/cv</a> · Blog: <a href="${LINKS.blog}">falax.netlify.app</a><br>
+      <a href="mailto:${LINKS.mail}">${LINKS.mail}</a> · <a href="tel:${LINKS.tel.replace(/\s/g,'')}">${LINKS.tel}</a></p>`;
+  }
+  openCard(`
+    <div class="head">
+      <div class="emoji">${s.gate ? '🏛️' : s.emoji}</div>
+      <div class="kicker">${s.range}</div>
+      <h2>${s.name}</h2>
+      <p class="role">${s.role}</p>
+    </div>
+    <div class="body">${s.box ? `<div class="cvbox ${s.box}"><h3>${s.boxTitle}</h3>${s.html}</div>` : s.html}${extra}</div>
+    <div class="foot">
+      <button class="btn" data-close type="button">${isEnd ? '🌊 Keep sailing' : '⛵ Set sail'}</button>
+      ${isEnd ? dlBtn : ''}
+    </div>`, s.kind === 'side' ? 'side' : '');
+}
 
+function openRead(){
+  const exp = STOPS.filter(s => s.kind === 'main' && s.key !== 'ambition').slice().reverse();
+  const side = STOPS.filter(s => s.kind === 'side');
+  const amb = STOPS.find(s => s.key === 'ambition');
+  readpanel.innerHTML = `
+  <div class="sheet" role="document">
+    <div class="sheet-head">
+      <img src="avatar.png" alt="Gabriele Cafiero">
+      <div>
+        <h1>Gabriele Cafiero</h1>
+        <div class="sub">Quality Assurance</div>
+        <div class="contact">
+          <a href="tel:${LINKS.tel.replace(/\s/g,'')}">${LINKS.tel}</a> ·
+          <a href="mailto:${LINKS.mail}">${LINKS.mail}</a><br>
+          Torino (TO) · born 1991 · open to full remote<br>
+          <span class="links"><a href="${LINKS.cv}">CV</a> · <a href="${LINKS.blog}">BLOG</a></span>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <h3>Job experience</h3>
+      ${exp.map(s => `<h4>${s.name} | ${s.range}</h4>${s.html}`).join('')}
+      <div class="box blue"><h3 style="margin-top:0;color:var(--blue);border-color:var(--blue)">Ambition</h3>${amb.html}</div>
+      <div class="box acc"><h3 style="margin-top:0">Hobbies &amp; passions</h3>${side.map(s => s.html).join('')}</div>
+      <h3>About me</h3>
+      ${ABOUT.map(p => p.startsWith('<') ? p : `<p>${p}</p>`).join('')}
+      <h3>Ne plus ultra</h3>
+      ${STOPS.find(s => s.gate).html}
+    </div>
+    <div class="sheet-foot">
+      ${dlBtn}
+      <button class="btn ghost" id="readClose" type="button">⛵ ${state.started ? 'Back to the sea' : 'Play the game'}</button>
+    </div>
+  </div>`;
+  readpanel.hidden = false; overlay.hidden = true; state.paused = true;
+  readpanel.scrollTop = 0;
+  $('readClose').addEventListener('click', closeRead);
+  $('readClose').focus();
+}
+function closeRead(){
+  readpanel.hidden = true;
+  if (!state.started) { introCard(); return; }
+  state.paused = false; boat.inv = Math.max(boat.inv, 2);
+}
+readpanel.addEventListener('click', e => { if (e.target === readpanel) closeRead(); });
+$('btnRead').addEventListener('click', () => { if (readpanel.hidden) openRead(); else closeRead(); });
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (!readpanel.hidden) closeRead(); else if (!overlay.hidden && state.started) closeCard(); }
+});
+
+/* ============================================================
+   INPUT
+   ============================================================ */
+let pressed = false;
+function setTargetFromEvent(e){
+  const rect = cvs.getBoundingClientRect();
+  const px = e.clientX - rect.left, py = e.clientY - rect.top;
+  target.x = Math.max(8, Math.min(WW-8, (px - offX)/S));
+  target.y = state.camY + py/S;
+  target.active = true;
+}
+cvs.addEventListener('pointerdown', e => { if (state.paused) return; pressed = true; cvs.setPointerCapture(e.pointerId); setTargetFromEvent(e); });
+cvs.addEventListener('pointermove', e => { if (pressed && !state.paused) setTargetFromEvent(e); });
+const up = () => { pressed = false; };
+cvs.addEventListener('pointerup', up); cvs.addEventListener('pointercancel', up);
+const KEYMAP = { ArrowLeft:'l', a:'l', A:'l', ArrowRight:'r', d:'r', D:'r', ArrowUp:'u', w:'u', W:'u', ArrowDown:'d', s:'d', S:'d' };
+window.addEventListener('keydown', e => { const k = KEYMAP[e.key]; if (k && !state.paused) { keys[k] = true; e.preventDefault(); } });
+window.addEventListener('keyup', e => { const k = KEYMAP[e.key]; if (k) keys[k] = false; });
+
+/* ============================================================
+   GAME LOGIC
+   ============================================================ */
+const MAXV = 118, BOAT_R = 7;
+function spawnSpray(x, y, n, col){
+  for (let i = 0; i < n; i++) {
+    const a = Math.random()*6.28, v = 20 + Math.random()*60;
+    particles.push({ x, y, vx:Math.cos(a)*v, vy:Math.sin(a)*v, life:.5+Math.random()*.4, max:.9, col, r:1.5+Math.random()*2 });
+  }
+}
+function hit(h){
+  if (boat.inv > 0) return;
+  boat.hearts--; boat.inv = 1.7; state.shake = .35;
+  const dx = boat.x - h.x, dy = boat.y - h.y, d = Math.hypot(dx, dy) || 1;
+  boat.vx = dx/d*170; boat.vy = dy/d*170 + (h.t==='w' ? 40 : 0);
+  target.active = false;
+  spawnSpray(boat.x, boat.y, 16, '#ffffff');
+  if (navigator.vibrate) { try { navigator.vibrate(60); } catch(e){} }
+  if (boat.hearts <= 0) {
+    toast('Capsized! Back to the last harbour.', 2800);
+    boat.hearts = 3; boat.inv = 2.5; boat.vx = boat.vy = 0;
+    boat.x = state.last.x; boat.y = state.last.y; target.active = false;
+  }
+  updateHud();
+}
+let wheelAng = 0, lastNeedle = null;
+function step(dt){
+  state.t += dt;
+  wheelAng += boat.vx*dt*.5;
+  for (const h of hazards) if (h.t === 'w' || h.t === 's') {
+    const nx = h.x0 + Math.sin(state.t*h.sp + h.ph) * h.amp;
+    if (h.t === 's') h.dir = nx >= h.x ? 1 : -1;
+    h.x = nx;
+  }
+  if (state.shake > 0) state.shake = Math.max(0, state.shake - dt);
+  for (let i = particles.length-1; i >= 0; i--) {
+    const p = particles[i]; p.life -= dt; p.x += p.vx*dt; p.y += p.vy*dt; p.vx *= .96; p.vy *= .96;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+  if (state.paused) return;
+
+  // keyboard overrides pointer target
+  let kx = (keys.r?1:0) - (keys.l?1:0), ky = (keys.d?1:0) - (keys.u?1:0);
+  let dvx = 0, dvy = 0;
+  if (kx || ky) {
+    const n = Math.hypot(kx, ky); dvx = kx/n*MAXV; dvy = ky/n*MAXV; target.active = false;
+  } else if (target.active) {
+    const dx = target.x - boat.x, dy = target.y - boat.y, d = Math.hypot(dx, dy);
+    if (d < 5 && !pressed) target.active = false;
+    else { const sp = Math.min(MAXV, d*3.2); dvx = dx/d*sp; dvy = dy/d*sp; }
+  }
+  const k = Math.min(1, dt*4.2);
+  boat.vx += (dvx - boat.vx)*k; boat.vy += (dvy - boat.vy)*k;
+  boat.x += boat.vx*dt; boat.y += boat.vy*dt;
+  boat.x = Math.max(12, Math.min(WW-12, boat.x));
+  boat.y = Math.max(TOP, Math.min(BOTTOM, boat.y));
+  if (boat.y <= TOP + .5 && state.t - (state.unkToast || -99) > 8) {
+    state.unkToast = state.t; toast('Here the map is still to be drawn. The next chapter is not written yet.', 3200);
+  }
+  const sp = Math.hypot(boat.vx, boat.vy);
+  if (sp > 12) { const want = Math.atan2(boat.vx, -boat.vy); let da = want - boat.a; da = Math.atan2(Math.sin(da), Math.cos(da)); boat.a += da*Math.min(1, dt*6); }
+  if (boat.inv > 0) boat.inv -= dt;
+  if (sp > 25 && Math.random() < dt*40) particles.push({ x:boat.x - boat.vx*.06, y:boat.y - boat.vy*.06, vx:0, vy:0, life:.7, max:.7, col:'#ffffff', r:2.2, wake:true });
+
+  // hazards
+  for (const h of hazards) {
+    if (Math.abs(h.y - boat.y) > 60) continue;
+    if (h.t === 'r') { if (Math.hypot(h.x-boat.x, h.y-boat.y) < h.r + BOAT_R) hit(h); }
+    else if (h.t === 's') { if (Math.hypot(h.x-boat.x, h.y-boat.y) < 13 + BOAT_R) hit(h); }
+    else { const ex = (boat.x-h.x)/(26+BOAT_R), ey = (boat.y-h.y)/(13+BOAT_R); if (ex*ex + ey*ey < 1) hit(h); }
+  }
+  // pillars of Hercules: columns are solid
+  for (const s of STOPS) if (s.gate) for (const sx of [-42, 42]) {
+    const dx = boat.x - (s.x + sx), dy = boat.y - s.y;
+    if (Math.abs(dx) < 11 + BOAT_R && dy > -52 && dy < 20) { boat.x = s.x + sx + (dx < 0 ? -1 : 1)*(11 + BOAT_R); boat.vx = 0; }
+  }
+  // islands
+  for (const s of STOPS) {
+    const d = Math.hypot(s.x-boat.x, s.y-boat.y);
+    const inside = d < s.r + (s.gate ? 10 : 24);
+    if (inside && !s._in) { s._in = true; if (visited.has(s.key)) { stopCard(s); boat.vx = boat.vy = 0; target.active = false; } else reach(s); break; }
+    if (!inside) s._in = false;
+    if (!s.gate && visited.has(s.key) && d < s.r*.85) { const a = Math.atan2(boat.y-s.y, boat.x-s.x); boat.x = s.x + Math.cos(a)*s.r*.85; boat.y = s.y + Math.sin(a)*s.r*.85; }
+  }
+  // camera
+  const wantCam = boat.y - viewH*.66;
+  state.camY += (wantCam - state.camY) * Math.min(1, dt*4);
+}
+function reach(s){
+  visited.add(s.key); boat.hearts = 3; boat.vx = boat.vy = 0; target.active = false;
+  const a = Math.atan2(boat.y - s.y, boat.x - s.x);
+  state.last = { x: s.x + Math.cos(a)*(s.r+34), y: s.y + Math.sin(a)*(s.r+34) };
+  spawnSpray(boat.x, boat.y, 22, '#ffe9a8');
+  updateHud();
+  stopCard(s);
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function drawSea(){
+  const g = ctx.createLinearGradient(0, 0, 0, ch);
+  g.addColorStop(0, '#8cc3e6'); g.addColorStop(1, '#b8dcf1');
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, cvs.width, cvs.height);
+}
+function drawWaterTexture(x0, x1, y0, y1){
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.1; ctx.beginPath();
+  const gs = 52;
+  for (let gy = Math.floor(y0/gs)*gs; gy < y1; gy += gs)
+    for (let gx = Math.floor(x0/gs)*gs; gx < x1; gx += gs) {
+      const hsh = Math.sin(gx*12.9898 + gy*78.233)*43758.5453, f = hsh - Math.floor(hsh);
+      const ox = gx + f*40 + Math.sin(state.t*.6 + f*9)*4, oy = gy + ((f*97)%1)*40;
+      ctx.moveTo(ox, oy); ctx.quadraticCurveTo(ox+6, oy-4, ox+12, oy); ctx.quadraticCurveTo(ox+18, oy+4, ox+24, oy);
+    }
+  ctx.stroke();
+}
+function drawChannel(y0, y1){
+  // darker open sea outside the sailing channel + buoys along its edges
+  ctx.fillStyle = 'rgba(30,70,110,.13)';
+  const vx0 = -offX/S - 10, vx1 = (cw-offX)/S + 10;
+  ctx.fillRect(vx0, y0, -vx0 + 0, y1 - y0);
+  ctx.fillRect(WW, y0, vx1 - WW, y1 - y0);
+  const step = 70;
+  for (let y = Math.floor(y0/step)*step; y < y1; y += step) {
+    for (const x of [0, WW]) {
+      const bob = Math.sin(state.t*2 + y*.1)*1.5;
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y+bob, 4.2, 0, 6.28); ctx.fill();
+      ctx.fillStyle = '#e2703a'; ctx.beginPath(); ctx.arc(x, y+bob, 2.6, 0, 6.28); ctx.fill();
+    }
+  }
+}
+function routePoints(){
+  return STOPS.filter(s => s.kind !== 'side');
+}
+function drawRoute(){
+  const pts = [{ x:START.x, y:START.y }, ...routePoints()];
+  ctx.save();
+  ctx.lineCap = 'round'; ctx.setLineDash([2, 10]); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.75)';
+  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) {
+    const p = pts[i-1], q = pts[i], my = (p.y + q.y)/2;
+    ctx.bezierCurveTo(p.x, my, q.x, my, q.x, q.y);
+  }
+  ctx.stroke();
+  // side branches: dashed from the point on the route at the same height
+  ctx.strokeStyle = 'rgba(226,112,58,.85)'; ctx.setLineDash([6, 9]);
+  for (const s of STOPS.filter(z => z.kind === 'side')) {
+    let ax = START.x, ay = s.y;
+    for (let i = 1; i < pts.length; i++) {
+      const p = pts[i-1], q = pts[i];
+      if (s.y <= p.y && s.y >= q.y) { const t = (p.y - s.y)/(p.y - q.y); ax = p.x + (q.x-p.x)*t; ay = s.y; break; }
+    }
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.quadraticCurveTo((ax+s.x)/2, ay - 24, s.x, s.y); ctx.stroke();
+  }
+  ctx.restore();
+}
+function blobPath(s, rad){
+  const n = 28; ctx.beginPath();
+  for (let i = 0; i <= n; i++) {
+    const a = i/n*6.2832;
+    const k = 1 + .09*Math.sin(3*a + s.x*.1) + .06*Math.sin(5*a + s.y*.05) + .04*Math.sin(7*a);
+    const x = s.x + Math.cos(a)*rad*k, y = s.y + Math.sin(a)*rad*k*.92;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.closePath();
+}
+function drawGate(s){
+  const seen = visited.has(s.key), pulse = (Math.sin(state.t*2.2) + 1)/2;
+  ctx.beginPath(); ctx.arc(s.x, s.y, s.r + 26 + (seen ? 0 : pulse*8), 0, 6.28);
+  ctx.fillStyle = `rgba(255,255,255,${seen ? .15 : .3 + pulse*.12})`; ctx.fill();
+  for (const sx of [-42, 42]) {
+    const x = s.x + sx;
+    ctx.fillStyle = 'rgba(20,50,80,.25)'; ctx.beginPath(); ctx.ellipse(x + 4, s.y + 24, 20, 8, 0, 0, 6.28); ctx.fill();
+    // rocky base
+    ctx.fillStyle = '#9a927f'; ctx.beginPath(); ctx.ellipse(x, s.y + 18, 24, 11, 0, 0, 6.28); ctx.fill();
+    // column
+    const g = ctx.createLinearGradient(x - 11, 0, x + 11, 0);
+    g.addColorStop(0, '#cfc7b4'); g.addColorStop(.5, '#f4efe2'); g.addColorStop(1, '#b3ab97');
+    ctx.fillStyle = g; ctx.fillRect(x - 11, s.y - 44, 22, 62);
+    ctx.strokeStyle = 'rgba(90,80,60,.35)'; ctx.lineWidth = 1;
+    for (let k = -5; k <= 5; k += 5) { ctx.beginPath(); ctx.moveTo(x + k, s.y - 42); ctx.lineTo(x + k, s.y + 16); ctx.stroke(); }
+    // capital + base
+    ctx.fillStyle = '#e6dfcc'; ctx.fillRect(x - 15, s.y - 52, 30, 9); ctx.fillRect(x - 14, s.y + 14, 28, 7);
+    ctx.strokeStyle = '#8b826c'; ctx.strokeRect(x - 15, s.y - 52, 30, 9);
+  }
+  // shimmering path between pillars
+  ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2; ctx.setLineDash([3, 8]);
+  ctx.beginPath(); ctx.moveTo(s.x, s.y + 60); ctx.lineTo(s.x, s.y - 90); ctx.stroke(); ctx.setLineDash([]);
+  // label
+  ctx.font = '700 11px -apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+  const label = 'Pillars of Hercules', tw = ctx.measureText(label).width + 18;
+  ctx.fillStyle = seen ? 'rgba(47,65,80,.88)' : 'rgba(255,255,255,.95)'; roundRect(s.x - tw/2, s.y + 36, tw, 20, 10); ctx.fill();
+  ctx.fillStyle = seen ? '#fff' : '#2f4150'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(label, s.x, s.y + 46.5);
+}
+function drawUnknown(x0, x1, y0){
+  if (y0 > EDGE) return;
+  const top = y0 - 30;
+  const edgeY = x => EDGE + Math.sin(x*.045)*5 + Math.sin(x*.13 + 1)*2.5;
+  const path = () => { ctx.beginPath(); ctx.moveTo(x0, top); ctx.lineTo(x0, edgeY(x0));
+    for (let x = x0; x <= x1; x += 8) ctx.lineTo(x, edgeY(x));
+    ctx.lineTo(x1, top); ctx.closePath(); };
+  // parchment
+  path(); const g = ctx.createLinearGradient(0, EDGE, 0, EDGE - 420);
+  g.addColorStop(0, '#e7d5a6'); g.addColorStop(.35, '#f1e5c4'); g.addColorStop(1, '#f7f0dc');
+  ctx.fillStyle = g; ctx.fill();
+  ctx.save(); path(); ctx.clip();
+  // pencil grid
+  ctx.strokeStyle = 'rgba(120,90,50,.16)'; ctx.lineWidth = 1; ctx.beginPath();
+  for (let x = Math.floor(x0/40)*40; x < x1; x += 40) { ctx.moveTo(x, top); ctx.lineTo(x, EDGE); }
+  for (let y = Math.floor(top/40)*40; y < EDGE; y += 40) { ctx.moveTo(x0, y); ctx.lineTo(x1, y); }
+  ctx.stroke();
+  // unfinished coastline sketches
+  ctx.strokeStyle = 'rgba(110,80,40,.5)'; ctx.lineWidth = 1.6; ctx.setLineDash([5, 7]); ctx.lineCap = 'round';
+  const sk = [[40,-110,120,-150,170,-120,205,-175],[260,-70,330,-130,380,-100,420,-170],[90,-250,150,-300,120,-340,200,-380],[300,-290,360,-250,330,-330,390,-360]];
+  for (const c of sk) { ctx.beginPath(); ctx.moveTo(c[0], EDGE + c[1]); ctx.bezierCurveTo(c[2], EDGE + c[3], c[4], EDGE + c[5], c[6], EDGE + c[7]); ctx.stroke(); }
+  // unfinished compass rose
+  const cx = 200, cy = EDGE - 190;
+  ctx.beginPath(); ctx.arc(cx, cy, 34, 0, 6.28); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, cy - 48); ctx.lineTo(cx, cy + 48); ctx.moveTo(cx - 48, cy); ctx.lineTo(cx + 48, cy); ctx.stroke();
+  ctx.setLineDash([]);
+  // question marks
+  ctx.fillStyle = 'rgba(110,80,40,.4)'; ctx.font = 'italic 700 26px Georgia,serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (const [qx, qy] of [[70,-60],[335,-40],[110,-170],[300,-215],[60,-300],[345,-330]]) ctx.fillText('?', qx, EDGE + qy);
+  // captions
+  ctx.fillStyle = 'rgba(70,50,25,.8)'; ctx.font = '700 17px Georgia,serif';
+  ctx.fillText('T E R R A   I N C O G N I T A', 200, EDGE - 95);
+  ctx.font = 'italic 13px Georgia,serif'; ctx.fillStyle = 'rgba(70,50,25,.7)';
+  ctx.fillText('this map is still to be drawn', 200, EDGE - 72);
+  ctx.fillText('(the next chapter is not written yet)', 200, EDGE - 54);
+  ctx.restore();
+  // shoreline: foam then ink
+  ctx.beginPath(); for (let x = x0; x <= x1; x += 8) x === x0 ? ctx.moveTo(x, edgeY(x)) : ctx.lineTo(x, edgeY(x));
+  ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 6; ctx.stroke();
+  ctx.strokeStyle = 'rgba(110,80,40,.6)'; ctx.lineWidth = 1.6; ctx.setLineDash([9, 5]); ctx.stroke(); ctx.setLineDash([]);
+}
+function drawIsland(s){
+  if (s.gate) return drawGate(s);
+  const seen = visited.has(s.key);
+  const pulse = (Math.sin(state.t*2.2) + 1)/2;
+  // harbour halo
+  ctx.beginPath(); ctx.arc(s.x, s.y, s.r + 18 + (seen ? 0 : pulse*7), 0, 6.28);
+  ctx.fillStyle = seen ? 'rgba(255,255,255,.18)' : `rgba(255,255,255,${.28 + pulse*.12})`; ctx.fill();
+  // shadow, sand, grass
+  ctx.save(); ctx.translate(3, 5); blobPath(s, s.r + 8); ctx.fillStyle = 'rgba(20,50,80,.2)'; ctx.fill(); ctx.restore();
+  blobPath(s, s.r + 8); ctx.fillStyle = '#f4e3b3'; ctx.fill();
+  blobPath(s, s.r); const g = ctx.createRadialGradient(s.x-10, s.y-12, 4, s.x, s.y, s.r);
+  g.addColorStop(0, s.c1); g.addColorStop(1, s.c2); ctx.fillStyle = g; ctx.fill();
+  ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.stroke();
+  // little trees
+  ctx.fillStyle = 'rgba(20,70,40,.35)';
+  for (let i = 0; i < 5; i++) { const a = i*1.9 + s.x, rr = s.r*.62; ctx.beginPath(); ctx.arc(s.x + Math.cos(a)*rr, s.y + Math.sin(a)*rr*.85, 4.5, 0, 6.28); ctx.fill(); }
+  // emoji
+  ctx.font = `${s.r*.9}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#000';
+  ctx.fillText(s.emoji, s.x, s.y + 2);
+  // label
+  const label = s.name, yr = s.year === 'next' ? '' : s.year;
+  ctx.font = '700 11px -apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+  const tw = ctx.measureText(label).width + (yr ? 38 : 16);
+  const lx = s.x - tw/2, ly = s.y + s.r + 14;
+  ctx.fillStyle = seen ? 'rgba(47,65,80,.88)' : 'rgba(255,255,255,.95)';
+  roundRect(lx, ly, tw, 20, 10); ctx.fill();
+  ctx.fillStyle = seen ? '#fff' : '#2f4150'; ctx.textAlign = 'left';
+  ctx.fillText(label, lx + 8 + (yr ? 30 : 0), ly + 10.5);
+  if (yr) { ctx.fillStyle = s.kind === 'side' ? '#e2703a' : '#2b6cb0'; roundRect(lx+3, ly+3, 28, 14, 7); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = '800 9.5px -apple-system,"Segoe UI",Roboto,Arial,sans-serif'; ctx.textAlign = 'center'; ctx.fillText(yr, lx+17, ly+10.5); }
+  if (seen) { ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('✅', s.x + s.r*.7, s.y - s.r*.7); }
+  else if (s.kind === 'side') { ctx.font = '700 9px -apple-system,Arial,sans-serif'; ctx.fillStyle = '#e2703a';
+    const w = ctx.measureText('side route').width + 10; ctx.fillStyle = '#e2703a'; roundRect(s.x - w/2, s.y - s.r - 22, w, 14, 7); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText('side route', s.x, s.y - s.r - 14.5); }
+}
+function roundRect(x, y, w, h, r){
+  ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath();
+}
+function drawRock(h){
+  ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.arc(h.x, h.y, h.r + 5 + Math.sin(state.t*2 + h.seed)*1.5, 0, 6.28); ctx.fill();
+  ctx.fillStyle = '#5b6770'; ctx.beginPath();
+  const n = 9;
+  for (let i = 0; i < n; i++) {
+    const a = i/n*6.28, k = .8 + .3*Math.abs(Math.sin(h.seed*3 + i*2.1));
+    const x = h.x + Math.cos(a)*h.r*k, y = h.y + Math.sin(a)*h.r*k;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#8a97a1'; ctx.beginPath(); ctx.arc(h.x - h.r*.25, h.y - h.r*.25, h.r*.5, 0, 6.28); ctx.fill();
+}
+function drawShark(h){
+  const t = state.t, d = h.dir, bob = Math.sin(t*4 + h.ph)*1.2;
+  ctx.save(); ctx.translate(h.x, h.y + bob);
+  // body shadow under water + wake
+  ctx.fillStyle = 'rgba(25,60,100,.28)'; ctx.beginPath(); ctx.ellipse(0, 3, 22, 7, 0, 0, 6.28); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-d*10, 4); ctx.quadraticCurveTo(-d*22, 0, -d*38, -5);
+  ctx.moveTo(-d*10, 4); ctx.quadraticCurveTo(-d*22, 9, -d*38, 14); ctx.stroke();
+  // dorsal fin
+  ctx.scale(d, 1);
+  ctx.fillStyle = '#56636f'; ctx.beginPath();
+  ctx.moveTo(-9, 4); ctx.quadraticCurveTo(-2, -2, 3, -17); ctx.quadraticCurveTo(7, -4, 12, 4); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#7d8a96'; ctx.beginPath(); ctx.moveTo(-5, 3); ctx.quadraticCurveTo(0, -3, 3, -14); ctx.lineTo(4, 3); ctx.closePath(); ctx.fill();
+  // tail fin peeking out
+  ctx.fillStyle = '#56636f'; ctx.beginPath(); ctx.moveTo(-18, 5); ctx.lineTo(-27, -3); ctx.lineTo(-23, 5); ctx.lineTo(-28, 12); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function drawWave(h){
+  // storm cloud shadow
+  ctx.fillStyle = 'rgba(25,45,75,.22)'; ctx.beginPath(); ctx.ellipse(h.x, h.y + 4, 46, 24, 0, 0, 6.28); ctx.fill();
+  const bob = Math.sin(state.t*3 + h.ph)*1.8;
+  for (let i = 0; i < 3; i++) {
+    const oy = h.y - 7 + i*8 + bob, w = 28 - i*3;
+    ctx.strokeStyle = i === 0 ? '#ffffff' : '#244f82'; ctx.lineWidth = i === 0 ? 3 : 4.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(h.x - w, oy + 5); ctx.quadraticCurveTo(h.x - w/2, oy - 10, h.x, oy); ctx.quadraticCurveTo(h.x + w/2, oy + 10, h.x + w, oy - 5); ctx.stroke();
+  }
+  // lightning flicker
+  if (Math.sin(state.t*1.3 + h.ph*5) > .965) {
+    ctx.strokeStyle = '#fff3a0'; ctx.lineWidth = 2; ctx.beginPath();
+    ctx.moveTo(h.x, h.y - 40); ctx.lineTo(h.x - 5, h.y - 24); ctx.lineTo(h.x + 3, h.y - 24); ctx.lineTo(h.x - 3, h.y - 10); ctx.stroke();
+  }
+}
+function drawBoat(){
+  if (boat.inv > 0 && Math.floor(boat.inv*10) % 2 === 0) return;
+  const lean = Math.max(-1, Math.min(1, boat.vx/MAXV));
+  ctx.save(); ctx.translate(boat.x, boat.y); ctx.rotate(boat.a);
+  const bob = Math.sin(state.t*5)*.6;
+  ctx.fillStyle = 'rgba(20,50,80,.25)'; ctx.beginPath(); ctx.ellipse(2, 4, 8, 17, 0, 0, 6.28); ctx.fill();
+  // hull
+  ctx.fillStyle = '#2f4150'; ctx.beginPath();
+  ctx.moveTo(0, -18 + bob); ctx.quadraticCurveTo(10, -2, 6.5, 14); ctx.lineTo(-6.5, 14); ctx.quadraticCurveTo(-10, -2, 0, -18 + bob); ctx.fill();
+  ctx.fillStyle = '#c99a5e'; ctx.beginPath();
+  ctx.moveTo(0, -13); ctx.quadraticCurveTo(6, -2, 4, 11); ctx.lineTo(-4, 11); ctx.quadraticCurveTo(-6, -2, 0, -13); ctx.fill();
+  // sail (swings opposite to the turn)
+  const sw = -lean*7 + 5;
+  ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#2f4150'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, -6); ctx.quadraticCurveTo(sw + 5, 4, sw*.8, 15); ctx.lineTo(0, 12); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = '#e2703a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(.8, 2); ctx.quadraticCurveTo(sw*.55 + 2, 7, sw*.5, 10.5); ctx.stroke();
+  // mast + flag
+  ctx.fillStyle = '#e2703a'; ctx.beginPath(); ctx.arc(0, -6, 2.4, 0, 6.28); ctx.fill();
+  ctx.restore();
+}
+function drawParticles(){
+  for (const p of particles) {
+    ctx.globalAlpha = Math.max(0, p.life/p.max) * (p.wake ? .55 : .9);
+    ctx.fillStyle = p.col; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.28); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+function drawGuide(){
+  // screen-space arrow towards the next unvisited main stop when it is off-screen above
+  const next = STOPS.find(s => s.kind !== 'side' && !visited.has(s.key));
+  if (!next || state.paused) return;
+  const sy = (next.y - state.camY)*S, sx = offX + next.x*S;
+  if (sy > 96) return;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const x = Math.max(offX + 20, Math.min(offX + WW*S - 20, sx)), y = 100;
+  ctx.fillStyle = '#e2703a'; ctx.beginPath(); ctx.moveTo(x, y - 14); ctx.lineTo(x + 12, y + 6); ctx.lineTo(x - 12, y + 6); ctx.closePath(); ctx.fill();
+  ctx.font = '700 11px -apple-system,Arial,sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#2f4150';
+  ctx.fillText(next.name, x, y + 22);
+}
+function render(){
+  drawSea();
+  const sh = state.shake > 0 ? (Math.random()-.5)*6*state.shake : 0;
+  const camY = state.camY;
+  ctx.setTransform(dpr*S, 0, 0, dpr*S, dpr*(offX + sh), -dpr*camY*S);
+  const y0 = camY - 40, y1 = camY + viewH + 40;
+  const x0 = -offX/S - 20, x1 = (cw - offX)/S + 20;
+  drawWaterTexture(x0, x1, y0, y1);
+  drawChannel(y0, y1);
+  drawRoute();
+  drawUnknown(x0, x1, y0);
+  // start harbour
+  ctx.fillStyle = '#c99a5e'; roundRect(START.x - 26, START.y + 22, 52, 9, 3); ctx.fill();
+  ctx.font = '700 11px -apple-system,Arial,sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#2f4150';
+  ctx.fillText('Torino · start', START.x, START.y + 46);
+  for (const h of hazards) { if (h.y < y0 - 40 || h.y > y1 + 40) continue; h.t === 'r' ? drawRock(h) : h.t === 's' ? drawShark(h) : drawWave(h); }
+  for (const s of STOPS) if (s.y > y0 - 120 && s.y < y1 + 120) drawIsland(s);
+  drawParticles();
+  drawBoat();
+  if (target.active) {
+    ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 2; ctx.beginPath();
+    ctx.arc(target.x, target.y, 8 + Math.sin(state.t*6)*1.5, 0, 6.28); ctx.stroke();
+  }
+  drawGuide();
+}
+
+/* ============================================================
+   MAIN LOOP
+   ============================================================ */
+let lastT = 0;
+const needleEl = $('needle'), wheelEl = $('wheelSpin');
+function frame(ts){
+  const dt = Math.min(.05, (ts - lastT)/1000 || 0); lastT = ts;
+  step(dt); render();
+  if ($('sideL').classList.contains('on')) {
+    needleEl.setAttribute('transform', `rotate(${(boat.a*57.2958).toFixed(1)})`);
+    wheelEl.setAttribute('transform', `rotate(${wheelAng.toFixed(1)})`);
+  }
+  requestAnimationFrame(frame);
+}
+state.camY = boat.y - viewH*.66;
+updateHud();
+introCard();
+requestAnimationFrame(frame);
+
+// tiny hook for automated smoke tests
+window.__cv = { boat, state, STOPS, hazards, step, render, visited, target, keys };
+})();
+</script>
 </body>
 </html>
