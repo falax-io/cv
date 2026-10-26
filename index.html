@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Gabriele Cafiero - CV Voyage</title>
-<meta name="description" content="Gabriele Cafiero, Quality Assurance. Sail through my career, island by island, avoiding rocks and storm waves.">
+<meta name="description" content="Gabriele Cafiero, Quality Assurance Engineer. Sail through my career, island by island, avoiding rocks and storm waves.">
 <meta property="og:title" content="Gabriele Cafiero - CV Voyage">
-<meta property="og:description" content="Sail through my career, island by island. Quality Assurance, Test Automation & AI.">
+<meta property="og:description" content="Sail through my career, island by island. Quality Assurance Engineer, Test Automation & AI.">
 <meta property="og:image" content="avatar.png">
 <meta name="theme-color" content="#9ec9e8">
 <link rel="icon" href="avatar.png">
@@ -123,7 +123,7 @@ noscript{position:fixed;inset:auto 0 0 0;background:#fff;padding:14px;z-index:20
 <header id="bar">
   <div class="brand">
     <img src="avatar.png" alt="Gabriele Cafiero">
-    <div><strong>Gabriele Cafiero</strong><small>Quality Assurance</small></div>
+    <div><strong>Gabriele Cafiero</strong><small>Quality Assurance Engineer</small></div>
   </div>
   <div class="hud" aria-live="polite"><span id="hearts" aria-label="Hull"></span><span id="prog"></span></div>
   <nav class="actions">
@@ -213,6 +213,10 @@ const STOPS = [
     c1:'#d96a45', c2:'#b94e30',
     html:`<p>At Generali I work as <b>Test Automation &amp; AI Architect</b>, setting the guidelines for a <b>centralized framework</b> that everyone can easily use and update. I <b>leveraged AI to automate</b> processes that were expensive in terms of human and economic cost.</p>
           <p>I have presented the project and the product I worked on a significant number of times, even in front of <b>hundreds of colleagues</b>. I support colleagues with their technical difficulties, always trying to automate the process so that I don't become a bottleneck, but rather an <b>enabler and facilitator</b> of their daily work.</p>` },
+  { key:'istqb', kind:'side', cert:true, x:330, y:-3600, r:44, emoji:'🎓', name:'ISTQB Foundation', range:'Side route · July 14, 2024', year:'2024',
+    role:'Certified Tester Foundation Level (CTFL v4.0)', box:'blue', boxTitle:'Certifications',
+    c1:'#8f9de0', c2:'#6a79c4',
+    html:`<p><img src="cv-source/istqb-ctfl-4-logo.jpg" alt="ISTQB CTFL 4.0 logo" width="72" height="72" style="float:right;margin:0 0 6px 12px;border-radius:8px"><b>ISTQB® Certified Tester Foundation Level (CTFL 4.0)</b>, issued on <b>July 14, 2024</b>.</p>` },
   { key:'sailing', kind:'side', x:70, y:-3860, r:44, emoji:'⛵', name:'Sailing', range:'Side route · 2026', year:'2026',
     role:'Hobbies & passions', box:'acc', boxTitle:'Hobbies & passions',
     c1:'#f1a56b', c2:'#d9803f',
@@ -342,7 +346,7 @@ function introCard(){
       <img class="intro-avatar" src="avatar.png" alt="Gabriele Cafiero">
       <div class="kicker">Interactive CV</div>
       <h2>Gabriele Cafiero</h2>
-      <p class="role">Quality Assurance</p>
+      <p class="role">Quality Assurance Engineer</p>
       <p class="meta">Torino (TO) · born 1991 · open to full remote</p>
     </div>
     <div class="body">
@@ -383,7 +387,8 @@ function stopCard(s){
 
 function openRead(){
   const exp = STOPS.filter(s => s.kind === 'main' && s.key !== 'ambition').slice().reverse();
-  const side = STOPS.filter(s => s.kind === 'side');
+  const side = STOPS.filter(s => s.kind === 'side' && !s.cert);
+  const certs = STOPS.filter(s => s.cert);
   const amb = STOPS.find(s => s.key === 'ambition');
   readpanel.innerHTML = `
   <div class="sheet" role="document">
@@ -391,7 +396,7 @@ function openRead(){
       <img src="avatar.png" alt="Gabriele Cafiero">
       <div>
         <h1>Gabriele Cafiero</h1>
-        <div class="sub">Quality Assurance</div>
+        <div class="sub">Quality Assurance Engineer</div>
         <div class="contact">
           <a href="tel:${LINKS.tel.replace(/\s/g,'')}">${LINKS.tel}</a> ·
           <a href="mailto:${LINKS.mail}">${LINKS.mail}</a><br>
@@ -404,6 +409,7 @@ function openRead(){
       <h3>Job experience</h3>
       ${exp.map(s => `<h4>${s.name} | ${s.range}</h4>${s.html}`).join('')}
       <div class="box blue"><h3 style="margin-top:0;color:var(--blue);border-color:var(--blue)">Ambition</h3>${amb.html}</div>
+      ${certs.length ? `<div class="box blue"><h3 style="margin-top:0;color:var(--blue);border-color:var(--blue)">Certifications</h3>${certs.map(s => s.html).join('')}</div>` : ''}
       <div class="box acc"><h3 style="margin-top:0">Hobbies &amp; passions</h3>${side.map(s => s.html).join('')}</div>
       <h3>About me</h3>
       ${ABOUT.map(p => p.startsWith('<') ? p : `<p>${p}</p>`).join('')}
